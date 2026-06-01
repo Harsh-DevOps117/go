@@ -1,0 +1,134 @@
+### Health Check
+
+GET http://localhost:3000/health
+
+###
+
+### Register User
+
+POST http://localhost:3000/v1/register
+Content-Type: application/json
+
+{
+"username": "harsh",
+"email": "harsh@gmail.com",
+"password": "password123"
+}
+
+###
+
+### Login User
+
+POST http://localhost:3000/v1/login
+Content-Type: application/json
+
+{
+"email": "harsh@gmail.com",
+"password": "password123"
+}
+
+###
+
+# Copy access token from login response
+
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODAyNzYxMDcsImlhdCI6MTc4MDI3NDkwNywicm9sZSI6IlVTRVIiLCJ1c2VyX2lkIjoxfQ.Uf8o955Dq1sHTU1GPv2knrm9z6XIK6yMIbQDAx-donc
+
+###
+
+### Create Note
+
+POST http://localhost:3000/notes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"title": "My First Note",
+"content": "Hello World"
+}
+
+###
+
+### Get All Notes
+
+GET http://localhost:3000/notes
+Authorization: Bearer {{token}}
+
+###
+
+### Get Note By ID
+
+GET http://localhost:3000/notes/1
+Authorization: Bearer {{token}}
+
+###
+
+### Update Note
+
+PUT http://localhost:3000/notes/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"title": "Updated Note",
+"content": "Updated Content"
+}
+
+###
+
+### Delete Note
+
+DELETE http://localhost:3000/notes/1
+Authorization: Bearer {{token}}
+
+###
+
+### Create Alarm
+
+POST http://localhost:3000/alarms
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"note_id": 1,
+"alarm_time": "2026-06-10T10:00:00Z"
+}
+
+###
+
+### Get All Alarms
+
+GET http://localhost:3000/alarms
+Authorization: Bearer {{token}}
+
+###
+
+### Get Alarm By ID
+
+GET http://localhost:3000/alarms/1
+Authorization: Bearer {{token}}
+
+###
+
+### Update Alarm
+
+PUT http://localhost:3000/alarms/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"alarm_time": "2026-06-15T12:00:00Z"
+}
+
+###
+
+### Delete Alarm
+
+DELETE http://localhost:3000/alarms/1
+Authorization: Bearer {{token}}
+
+###
+
+### Logout
+
+POST http://localhost:3000/v1/logout/1
+Authorization: Bearer {{token}}
