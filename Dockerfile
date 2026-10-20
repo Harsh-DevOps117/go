@@ -1,26 +1,15 @@
-FROM golang:1.26.3 AS builder
-
-WORKDIR /app
-
+FROM golang:1.27.3-alpine AS builder
+WORKDIR /src
 COPY go.mod go.sum ./
-
 RUN go mod download
-
 COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/noteflow ./cmd/server
 
-RUN CGO_ENABLED=0 GOOS=linux go build \
-    -ldflags="-s -w" \
-    -o server \
-    ./cmd/internal
-
-FROM alpine:latest
-
-RUN apk add --no-cache ca-certificates
-
-WORKDIR /root
-
-COPY --from=builder /app/server .
-
+FROM alpine:3.23
+RUN apk add --no-cache ca-certificates && addgroup -S app && adduser -S -G app app
+WORKDIR /app
+COPY --from=builder /out/noteflow /app/noteflow
+USER app:app
 EXPOSE 3000
-
-CMD ["./server"]
+ENTRYPOINT ["/app/noteflow"]
+CMD ["serve"]

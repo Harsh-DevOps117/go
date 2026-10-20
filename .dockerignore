@@ -1,0 +1,9 @@
+.git
+.github
+.env
+.env.*
+bin
+coverage.*
+**/*_test.go
+README.md
+docs

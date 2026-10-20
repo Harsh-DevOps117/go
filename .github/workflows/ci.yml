@@ -1,29 +1,53 @@
 name: CI
-
 on:
   push:
-    branches:
-      - main
-
+    branches: [master, main]
   pull_request:
-    branches:
-      - main
-
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  test:
+  verify:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: noteflow
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: noteflow_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U noteflow -d noteflow_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://noteflow:test-only-password@localhost:5432/noteflow_test?sslmode=disable
+      TEST_REDIS_URL: redis://localhost:6379/0
+      GIN_MODE: release
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
-
+          go-version-file: go.mod
+          cache: true
       - run: go mod download
-
-      - run: go test ./...
-
+      - run: test -z "$(gofmt -l cmd internal)"
+      - run: go mod tidy && git diff --exit-code -- go.mod go.sum
+      - run: go vet ./...
+      - run: make audit
+      - run: go test -race -coverprofile=coverage.out ./...
       - run: go build ./...
-
-      - run: docker build -t app .
+      - run: docker build -t noteflow:ci .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out

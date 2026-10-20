@@ -1,69 +1,62 @@
-version: "3.9"
-
 services:
   app:
     build: .
     ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    restart: unless-stopped
+      - "127.0.0.1:${PORT:-3000}:3000"
+    environment:
+      APP_ENV: production
+      PORT: "3000"
+      AUTO_MIGRATE: "true"
+      JWT_SECRET: ${JWT_SECRET:?Run make setup first}
+      DATABASE_URL: postgres://noteflow:${POSTGRES_PASSWORD:?Run make setup first}@postgres:5432/noteflow?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
     depends_on:
-      redis:
-        condition: service_healthy
       postgres:
         condition: service_healthy
-    networks:
-      - GOAPP
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 15s
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1:3000/health/ready]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
-
   postgres:
-    image: postgres:14-alpine
-    restart: unless-stopped
+    image: postgres:17-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: notesdb
+      POSTGRES_USER: noteflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run make setup first}
+      POSTGRES_DB: noteflow
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-    ports:
-      - "5432:5432"
-    networks:
-      - GOAPP
-
+      test: [CMD-SHELL, "pg_isready -U noteflow -d noteflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
   redis:
     image: redis:7-alpine
-    restart: unless-stopped
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
+    command: [redis-server, --maxmemory, 64mb, --maxmemory-policy, noeviction, --save, "", --appendonly, "no"]
     ports:
-      - "6379:6379"
-    networks:
-      - GOAPP
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-networks:
-  GOAPP:
-    driver: bridge
-
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
 volumes:
-  redis_data:
   postgres_data:

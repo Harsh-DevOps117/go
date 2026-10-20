@@ -1,0 +1,1392 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NoteFlow API",
+    "version": "2.0.0",
+    "description": "Gin API for private notes and reminders. Requests are capped at 1 MiB. All responses carry X-Request-ID and Cache-Control: no-store. Authentication endpoints share a 10/min/IP budget; the API has a 120/min/IP budget."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "operationId": "register",
+        "summary": "Register a user",
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error4131"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error4091"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Registration"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Create a session",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Tokens"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error4131"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "refresh",
+        "summary": "Rotate a single-use refresh token",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Tokens"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error4131"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Refresh"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "summary": "Revoke the current session immediately",
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          }
+        }
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "me",
+        "summary": "Get the authenticated user",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          }
+        }
+      }
+    },
+    "/api/v1/notes": {
+      "get": {
+        "operationId": "listNotes",
+        "summary": "List your notes",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NoteList"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createNote",
+        "summary": "Create a note",
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Note"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error4131"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNote"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notes/{id}": {
+      "get": {
+        "operationId": "getNote",
+        "summary": "Get your note",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Note"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error4041"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "patchNote",
+        "summary": "Update your note",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Note"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error4041"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error4131"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchNote"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "deleteNote",
+        "summary": "Delete your note",
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error4041"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/alarms": {
+      "get": {
+        "operationId": "listAlarms",
+        "summary": "List your alarms",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AlarmList"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "scheduled",
+                "fired"
+              ]
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createAlarm",
+        "summary": "Create a alarm",
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Alarm"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error4131"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error4042"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAlarm"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alarms/{id}": {
+      "get": {
+        "operationId": "getAlarm",
+        "summary": "Get your alarm",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Alarm"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error4041"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "patchAlarm",
+        "summary": "Update your alarm",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Alarm"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error4041"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error4131"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchAlarm"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "deleteAlarm",
+        "summary": "Delete your alarm",
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error4001"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error4011"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error4291"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error5001"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error5041"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error4041"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/health/live": {
+      "get": {
+        "operationId": "liveness",
+        "summary": "Process liveness",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "readiness",
+        "summary": "Database readiness",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "503": {
+            "$ref": "#/components/responses/Error5031"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Alias for database readiness",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "503": {
+            "$ref": "#/components/responses/Error5031"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "email",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "Note": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "title",
+          "content",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "Alarm": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "note_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "alarm_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "fired"
+            ]
+          },
+          "fired_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "note_id",
+          "alarm_time",
+          "status",
+          "fired_at",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "Registration": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 40
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 72,
+            "writeOnly": true,
+            "description": "At least 12 Unicode characters and at most 72 UTF-8 bytes."
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "Credentials": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "Refresh": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}\\.[0-9a-f]{64}$",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "refresh_token"
+        ],
+        "additionalProperties": false
+      },
+      "Tokens": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "Bearer"
+            ]
+          },
+          "expires_in": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": [
+          "access_token",
+          "refresh_token",
+          "token_type",
+          "expires_in",
+          "user"
+        ]
+      },
+      "CreateNote": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 100000,
+            "description": "Maximum 100,000 UTF-8 bytes; empty is allowed."
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "PatchNote": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 100000,
+            "description": "An empty string clears content; maximum 100,000 UTF-8 bytes."
+          }
+        },
+        "required": [],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "title"
+            ]
+          },
+          {
+            "required": [
+              "content"
+            ]
+          }
+        ]
+      },
+      "CreateAlarm": {
+        "type": "object",
+        "properties": {
+          "note_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "alarm_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "A timestamp in the future, with an explicit timezone."
+          }
+        },
+        "required": [
+          "note_id",
+          "alarm_time"
+        ],
+        "additionalProperties": false
+      },
+      "PatchAlarm": {
+        "type": "object",
+        "properties": {
+          "alarm_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "A future timestamp. Resets the alarm to scheduled."
+          }
+        },
+        "required": [
+          "alarm_time"
+        ],
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "request_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "request_id"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "ready"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "NoteList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Note"
+            }
+          },
+          "next_cursor": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Pass as before to fetch the next page; null means no next page."
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ]
+      },
+      "AlarmList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Alarm"
+            }
+          },
+          "next_cursor": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Pass as before to fetch the next page; null means no next page."
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ]
+      }
+    },
+    "responses": {
+      "Error4001": {
+        "description": "Invalid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error4011": {
+        "description": "Missing, invalid, or expired credentials",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error4291": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Seconds until retry."
+          }
+        }
+      },
+      "Error5001": {
+        "description": "Internal error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error5041": {
+        "description": "Request timeout",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error4131": {
+        "description": "Request body exceeds 1 MiB",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error4091": {
+        "description": "Email already registered",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error4041": {
+        "description": "Resource missing or owned by another user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error4042": {
+        "description": "Owned note not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error5031": {
+        "description": "Database unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}
